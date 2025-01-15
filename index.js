@@ -31,6 +31,9 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+	const db = client.db('scholarship-session');
+	const usersCollection = db.collection('users');
+
   // jwt related api
   app.post('/jwt', async (req, res) => {
 	const user = req.body;
@@ -58,13 +61,41 @@ async function run() {
     const verifyAdmin = async (req, res, next) => {
 		const email = req.decoded.email;
 		const query = { email: email };
-		const user = await userCollection.findOne(query);
+		const user = await usersCollection.findOne(query);
 		const isAdmin = user?.role === 'admin';
 		if (!isAdmin) {
 		  return res.status(403).send({ message: 'forbidden access' });
 		}
 		next();
 	  };
+
+
+	  //users related api
+
+	  //save or update user in db
+	  app.post('/users/:email', async(req, res) =>{
+
+		const email = req.params.email;
+		const query = { email};
+		const user = req.body;
+		console.log(user);
+		
+		//check if user exists in db
+		const isExist = await usersCollection.findOne(query);
+  
+		  if(isExist){
+			return res.send(isExist);
+		  }
+  
+		const result = await usersCollection.insertOne({
+		//   name: user?.image,
+		//   email: user?.email,
+		//   image: user?.image,
+		...user,
+		  role: 'student',
+		  timestamp: Date.now()});
+		res.send(result);
+	  })
 
 
 
