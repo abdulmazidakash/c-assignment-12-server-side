@@ -80,7 +80,7 @@ async function run() {
 		const email = req.params.email;
 		const query = { email};
 		const user = req.body;
-		console.log(user);
+		// console.log(user);
 		
 		//check if user exists in db
 		const isExist = await usersCollection.findOne(query);
@@ -105,6 +105,12 @@ async function run() {
 	  app.post('/scholarships', verifyToken, async(req, res) =>{
 		const scholarship = req.body;
 		const result = await scholarshipCollection.insertOne(scholarship);
+		res.send(result);
+	  })
+
+	  //get all scholarships data from db
+	  app.get('/scholarships', async(req, res) =>{
+		const result = await scholarshipCollection.find().limit(20).toArray();
 		res.send(result);
 	  })
 
