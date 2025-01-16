@@ -138,11 +138,7 @@ async function run() {
 		res.send({
 			clientSecret: paymentIntent.client_secret
 		})
-	  })
-
-
-
-
+	  });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
