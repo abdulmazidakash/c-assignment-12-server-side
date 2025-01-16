@@ -2,9 +2,10 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-require('dotenv').config()
+require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const morgan = require('morgan')
+const morgan = require('morgan');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const port = process.env.PORT || 5000;
 
 
@@ -120,6 +121,23 @@ async function run() {
 		const query = { _id: new ObjectId(id)};
 		const result = await scholarshipCollection.findOne(query);
 		res.send(result);
+	  });
+
+
+	  //payment intent
+	  app.post('/create-payment-intent', async(req, res) =>{
+		const { applicationFees } = req.body;
+		const amount = parseInt(applicationFees * 100);
+
+		const paymentIntent = await stripe.paymentIntents.create({
+			amount: amount,
+			currency: 'usd',
+			payment_method_types: ['card']
+		});
+
+		res.send({
+			clientSecret: paymentIntent.client_secret
+		})
 	  })
 
 
