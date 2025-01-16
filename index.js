@@ -33,6 +33,7 @@ async function run() {
 
 	const db = client.db('scholarship-session');
 	const usersCollection = db.collection('users');
+	const scholarshipCollection = db.collection('scholarships');
 
   // jwt related api
   app.post('/jwt', async (req, res) => {
@@ -70,6 +71,7 @@ async function run() {
 	  };
 
 
+	  //____________________
 	  //users related api
 
 	  //save or update user in db
@@ -94,6 +96,15 @@ async function run() {
 		...user,
 		  role: 'student',
 		  timestamp: Date.now()});
+		res.send(result);
+	  })
+
+	  
+	  //____________________
+	  //save a scholarship data in db
+	  app.post('/scholarships', verifyToken, async(req, res) =>{
+		const scholarship = req.body;
+		const result = await scholarshipCollection.insertOne(scholarship);
 		res.send(result);
 	  })
 
