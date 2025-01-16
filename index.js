@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const morgan = require('morgan')
 const port = process.env.PORT || 5000;
 
@@ -111,6 +111,14 @@ async function run() {
 	  //get all scholarships data from db
 	  app.get('/scholarships', async(req, res) =>{
 		const result = await scholarshipCollection.find().limit(20).toArray();
+		res.send(result);
+	  });
+
+	  // get a scholarships details by id
+	  app.get('/scholarships/:id', async(req, res) =>{
+		const id = req.params.id;
+		const query = { _id: new ObjectId(id)};
+		const result = await scholarshipCollection.findOne(query);
 		res.send(result);
 	  })
 
