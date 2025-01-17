@@ -35,6 +35,7 @@ async function run() {
 	const db = client.db('scholarship-session');
 	const usersCollection = db.collection('users');
 	const scholarshipCollection = db.collection('scholarships');
+	const applyScholarshipCollection = db.collection('applyScholarships');
 
   // jwt related api
   app.post('/jwt', async (req, res) => {
@@ -72,8 +73,8 @@ async function run() {
 	  };
 
 
-	  //____________________
-	  //users related api
+
+	  //users related api____________________
 
 	  //save or update user in db
 	  app.post('/users/:email', async(req, res) =>{
@@ -101,7 +102,7 @@ async function run() {
 	  })
 
 	  
-	  //____________________
+	  //add scholarship data____________________
 	  //save a scholarship data in db
 	  app.post('/scholarships', verifyToken, async(req, res) =>{
 		const scholarship = req.body;
@@ -123,7 +124,19 @@ async function run() {
 		res.send(result);
 	  });
 
+	  //application related data___________
 
+	  //save applyScholarship data in db
+	  app.post('/apply-scholarship', verifyToken, async(req, res) =>{
+		const applyScholarshipInfo = req.body;
+		const result = await applyScholarshipCollection.insertOne(applyScholarshipInfo);
+		res.send(result);
+	  })
+	  
+
+
+
+	  //payment related_______________
 	  //payment intent
 	  app.post('/create-payment-intent', async(req, res) =>{
 		const { applicationFees } = req.body;
