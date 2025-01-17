@@ -131,6 +131,15 @@ async function run() {
 		const applyScholarshipInfo = req.body;
 		const result = await applyScholarshipCollection.insertOne(applyScholarshipInfo);
 		res.send(result);
+	  });
+
+	  //get my application for a specific student
+	  app.get('/apply-scholarship/:email',  verifyToken, async(req, res) =>{
+		const email = req.params.email;
+		const query = { 'student.userEmail': email};
+		const result = await applyScholarshipCollection.find(query).toArray();
+		console.log(result);
+		res.send(result);
 	  })
 	  
 
