@@ -138,9 +138,19 @@ async function run() {
 		const email = req.params.email;
 		const query = { 'student.userEmail': email};
 		const result = await applyScholarshipCollection.find(query).toArray();
-		console.log(result);
+		// console.log(result);
 		res.send(result);
-	  })
+	  });
+
+	  //cancel my application
+	  app.delete('/my-application/:id', verifyToken, async(req, res) =>{
+		const id = req.params.id;
+		const query = { _id: new ObjectId(id)};
+		const result = await applyScholarshipCollection.deleteOne(query);
+		res.send(result);
+	  });
+
+	  
 	  
 
 
