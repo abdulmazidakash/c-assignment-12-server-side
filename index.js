@@ -156,9 +156,55 @@ async function run() {
 		const query = { _id: new ObjectId(id)};
 		const result = await applyScholarshipCollection.findOne(query);
 		res.send(result);
-	  })
+	  });
 
+	//   //edit my application page patch request api
 
+	app.patch('/edit-my-application/:id', async (req, res) => {
+		const item = req.body;
+		const id = req.params.id;
+		const filter = { _id: new ObjectId(id) };
+	  
+		const updatedDoc = {
+		  $set: {
+			phone: item.phone,
+			photo: item.photo,
+			village: item.studentAddress.village,
+			district: item.studentAddress.district,
+			country: item.studentAddress.country,
+			gender: item.gender,
+			degree: item.degree,
+			sscResult: item.sscResult,
+			hscResult: item.hscResult,
+			studyGap: item.studyGap,
+		  },
+		};
+	  
+		try {
+		  const result = await applyScholarshipCollection.updateOne(filter, updatedDoc);
+
+		  if(result.status === 'processing')
+			return res
+		  			.status(409)
+					.send('cannot update once the application is processing')
+	  
+		  if (result.matchedCount === 0) {
+			// Document not found
+			return res.status(404).send({ message: 'Application not found', success: false });
+		  }
+	  
+		  if (result.modifiedCount === 0) {
+			// No changes made
+			return res.status(200).send({ message: 'No changes were made', success: true });
+		  }
+	  
+		  // Successful update
+		  res.status(200).send({ message: 'Application updated successfully', success: true });
+		} catch (error) {
+		  console.error('Error updating application:', error);
+		  res.status(500).send({ message: 'Failed to update the application', success: false });
+		}
+	  });
 	  
 
 
