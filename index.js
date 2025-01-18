@@ -196,6 +196,16 @@ async function run() {
 		res.send(result);
 	  });
 
+	  //moderator and admin manage scholarship page api_________
+	  //delete scholarship related api
+
+		app.delete('/scholarship/:id', verifyToken, async(req, res) =>{
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id)};
+			const result = await scholarshipCollection.deleteOne(query);
+			res.send(result);
+			});
+
 	  //my application page related api___________
 
 	  //save applyScholarship data in db
