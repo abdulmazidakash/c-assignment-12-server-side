@@ -124,7 +124,7 @@ async function run() {
 		res.send(result);
 	  });
 
-	  //application related data___________
+	  //my application page related api___________
 
 	  //save applyScholarship data in db
 	  app.post('/apply-scholarship', verifyToken, async(req, res) =>{
@@ -142,7 +142,7 @@ async function run() {
 		res.send(result);
 	  });
 
-	  //cancel my application
+	  //cancel my application api
 	  app.delete('/my-application/:id', verifyToken, async(req, res) =>{
 		const id = req.params.id;
 		const query = { _id: new ObjectId(id)};
@@ -150,7 +150,15 @@ async function run() {
 		res.send(result);
 	  });
 
-	  
+	  //edit my application page api
+	  app.get('/edit-my-application/:id', verifyToken, async(req, res) =>{
+		const id = req.params.id;
+		const query = { _id: new ObjectId(id)};
+		const result = await applyScholarshipCollection.findOne(query);
+		res.send(result);
+	  })
+
+
 	  
 
 
