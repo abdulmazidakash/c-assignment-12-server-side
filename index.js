@@ -101,7 +101,7 @@ async function run() {
 		res.send(result);
 	  });
 
-	  //manage user status and role
+	  //manage user status and role api
 	  app.patch('/users/:email', verifyToken, async(req, res) =>{
 		const email = req.params.email;
 		const query = { email};
@@ -120,6 +120,15 @@ async function run() {
 
 		const result = await usersCollection.updateOne(query, updatedDoc);
 		res.send(result);
+	  });
+
+
+	  //get user role
+	  app.get('/users/role/:email', async(req, res) =>{
+		const email = req.params.email;
+		const result = await usersCollection.findOne({email});
+		res.send({ role: result?.role})
+
 	  })
 
 	  
@@ -186,7 +195,6 @@ async function run() {
 		const item = req.body;
 		const id = req.params.id;
 		const filter = { _id: new ObjectId(id) };
-	  
 		const updatedDoc = {
 		  $set: {
 			phone: item.phone,
