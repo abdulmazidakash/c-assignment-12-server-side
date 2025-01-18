@@ -99,10 +99,32 @@ async function run() {
 		  role: 'student',
 		  timestamp: Date.now()});
 		res.send(result);
+	  });
+
+	  //manage user status and role
+	  app.patch('/users/:email', verifyToken, async(req, res) =>{
+		const email = req.params.email;
+		const query = { email};
+		const user = await usersCollection.findOne(query);  
+		
+		if(!user || user?.status === 'Requested')
+			return res
+					.status(409)
+					.send('You have already requested wait for some time.')
+		
+		const updatedDoc = {
+			$set: {
+				status: 'Requested',
+			},
+		}
+
+		const result = await usersCollection.updateOne(query, updatedDoc);
+		res.send(result);
 	  })
 
 	  
 	  //add scholarship data____________________
+
 	  //save a scholarship data in db
 	  app.post('/scholarships', verifyToken, async(req, res) =>{
 		const scholarship = req.body;
