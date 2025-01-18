@@ -129,6 +129,12 @@ async function run() {
 		const result = await usersCollection.findOne({email});
 		res.send({ role: result?.role})
 
+	  });
+
+	  //get all user data
+	  app.get('/all-users', verifyToken, async(req, res) =>{
+		const result = await usersCollection.find().toArray();
+		res.send(result);
 	  })
 
 	  
