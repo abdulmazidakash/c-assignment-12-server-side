@@ -162,7 +162,15 @@ async function run() {
 		};
 		const result = await usersCollection.updateOne(filter, updatedDoc);
 		res.send(result);
-	  })
+	  });
+
+	  //delete user related api
+		app.delete('/user/:id', verifyToken, async(req, res) =>{
+			const id = req.params.id;
+			const query = { _id: new ObjectId(id)};
+			const result = await usersCollection.deleteOne(query);
+			res.send(result);
+			});
 
 	  
 	  //add scholarship data____________________
