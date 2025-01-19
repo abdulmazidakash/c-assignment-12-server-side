@@ -209,7 +209,7 @@ async function run() {
 		
 	//update scholarship modal api - manage scholarship page
 
-	app.patch('/edit-manage-scholarship/:id', verifyToken, async (req, res) => {
+	app.put('/edit-manage-scholarship/:id', verifyToken, async (req, res) => {
 		const item = req.body;
 		console.log(item);
 		const id = req.params.id;
@@ -289,10 +289,10 @@ async function run() {
 		const result = await applyScholarshipCollection.findOne(query);
 		res.send(result);
 	  });
+	  
+	  //edit my application page patch request api
 
-	//   //edit my application page patch request api
-
-	app.patch('/edit-my-application/:id', async (req, res) => {
+	  app.patch('/edit-my-application/:id', async (req, res) => {
 		const item = req.body;
 		const id = req.params.id;
 		const filter = { _id: new ObjectId(id) };
@@ -335,7 +335,23 @@ async function run() {
 		  console.error('Error updating application:', error);
 		  res.status(500).send({ message: 'Failed to update the application', success: false });
 		}
-	  });
+	   });
+
+	   //all applied scholarship page___________
+	   //get all applied scholarship data from applyScholarships collection
+		app.get("/apply-scholarships", async (req, res) => {
+			try {
+			const { status } = req.query; // Optional filter for status
+			const filter = {};
+			if (status) filter.status = status;
+		
+			const scholarships = await applyScholarshipCollection.find(filter).toArray();
+			res.send(scholarships);
+			} catch (error) {
+			console.error("Error fetching scholarships:", error);
+			res.status(500).send({ error: "Failed to fetch scholarships" });
+			}
+		});
 	  
 
 
