@@ -240,7 +240,7 @@ async function run() {
 	  
 		  if (result.matchedCount === 0) {
 			// Document not found
-			return res.status(404).send({ message: 'Application not found', success: false });
+			return res.status(404).send({ message: 'scholarship not found', success: false });
 		  }
 	  
 		  if (result.modifiedCount === 0) {
@@ -249,10 +249,10 @@ async function run() {
 		  }
 	  
 		  // Successful update
-		  res.status(200).send({ message: 'Application updated successfully', success: true });
+		  res.status(200).send({ message: 'scholarship updated successfully', success: true });
 		} catch (error) {
-		  console.error('Error updating application:', error);
-		  res.status(500).send({ message: 'Failed to update the application', success: false });
+		  console.error('Error updating scholarship:', error);
+		  res.status(500).send({ message: 'Failed to update the scholarship', success: false });
 		}
 	  });
 
