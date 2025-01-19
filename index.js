@@ -352,6 +352,28 @@ async function run() {
 			res.status(500).send({ error: "Failed to fetch scholarships" });
 			}
 		});
+
+		// 4. Cancel a scholarship application
+		app.patch("/apply-scholarship/cancel/:id", async (req, res) => {
+			try {
+			const { id } = req.params;
+			const filter = { _id: new ObjectId(id) };
+			const updatedDoc = {
+				 $set: { status: "rejected" }
+			}
+		
+			const result = await applyScholarshipCollection.updateOne(filter, updatedDoc);
+		
+			if (result.modifiedCount === 0) {
+				return res.status(404).send({ error: "Scholarship not found or not canceled" });
+			}
+		
+			res.send({ message: "Scholarship application canceled successfully" });
+			} catch (error) {
+			console.error("Error canceling scholarship:", error);
+			res.status(500).send({ error: "Failed to cancel scholarship" });
+			}
+		});
 	  
 
 
