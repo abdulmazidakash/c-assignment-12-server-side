@@ -404,6 +404,32 @@ async function run() {
 			}
 		});
 	  
+		// Add feedback to a scholarship
+		app.patch("/apply-scholarship/:id/feedback", async (req, res) => {
+			try {
+			const { id } = req.params;
+			const { feedback } = req.body;
+		
+			if (!feedback) {
+				return res.status(400).send({ error: "Feedback is required" });
+			}
+		
+			const result = await applyScholarshipCollection.updateOne(
+				{ _id: new ObjectId(id) },
+				{ $set: { feedback } }
+			);
+		
+			if (result.modifiedCount === 0) {
+				return res.status(404).send({ error: "Scholarship not found or feedback not updated" });
+			}
+		
+			res.send({ message: "Feedback added successfully" });
+			} catch (error) {
+			console.error("Error adding feedback:", error);
+			res.status(500).send({ error: "Failed to add feedback" });
+			}
+		});
+  
 
 
 
