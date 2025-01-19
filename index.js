@@ -353,7 +353,7 @@ async function run() {
 			}
 		});
 
-		// 4. Cancel a scholarship application
+		// Cancel a scholarship application
 		app.patch("/apply-scholarship/cancel/:id", async (req, res) => {
 			try {
 			const { id } = req.params;
@@ -372,6 +372,35 @@ async function run() {
 			} catch (error) {
 			console.error("Error canceling scholarship:", error);
 			res.status(500).send({ error: "Failed to cancel scholarship" });
+			}
+		});
+
+		// Update Application Status
+		app.patch('/update-status/:id', async (req, res) => {
+			const { id } = req.params; // Application ID
+			const { status } = req.body; // New status from the request body
+		
+			// Validate the status
+			const validStatuses = ["pending", "processing", "completed"];
+			if (!validStatuses.includes(status)) {
+			return res.status(400).send({ message: "Invalid status value" });
+			}
+		
+			try {
+			// Update the application status in the database
+			const result = await applyScholarshipCollection.updateOne(
+				{ _id: new ObjectId(id) },
+				{ $set: { status } }
+			);
+		
+			if (result.modifiedCount === 1) {
+				res.status(200).send({ message: "Application status updated successfully" });
+			} else {
+				res.status(404).send({ message: "Application not found" });
+			}
+			} catch (error) {
+			console.error("Error updating status:", error);
+			res.status(500).send({ message: "Failed to update application status" });
 			}
 		});
 	  
