@@ -196,8 +196,9 @@ async function run() {
 		res.send(result);
 	  });
 
+
 	  //moderator and admin manage scholarship page api_________
-	  //delete scholarship related api
+	  //delete manage scholarship related api
 
 		app.delete('/scholarship/:id', verifyToken, async(req, res) =>{
 			const id = req.params.id;
@@ -205,6 +206,55 @@ async function run() {
 			const result = await scholarshipCollection.deleteOne(query);
 			res.send(result);
 			});
+		
+	//update scholarship modal api - manage scholarship page
+
+	app.patch('/edit-manage-scholarship/:id', verifyToken, async (req, res) => {
+		const item = req.body;
+		console.log(item);
+		const id = req.params.id;
+		const filter = { _id: new ObjectId(id) };
+		const updatedDoc = {
+		  $set: {
+			scholarshipName: item?.scholarshipName,
+			universityName: item?.universityName,
+			universityCountry: item?.universityCountry,
+			universityCity: item?.universityCity,
+			universityRank: item?.universityRank,
+			universityCity: item?.universityCity,
+			tuitionFees: item?.tuitionFees,
+			applicationFees: item?.applicationFees,
+			serviceCharge: item?.serviceCharge,
+			applicationDeadline: item?.applicationDeadline,
+			postDate: item?.postDate,
+			subjectCategory: item?.subjectCategory,
+			scholarshipCategory: item?.scholarshipCategory,
+			degreeCategory: item?.degreeCategory,
+			image: item?.image,
+			postedUserEmail: item?.postedUserEmail,
+		  },
+		};
+	  
+		try {
+		  const result = await scholarshipCollection.updateOne(filter, updatedDoc);
+	  
+		  if (result.matchedCount === 0) {
+			// Document not found
+			return res.status(404).send({ message: 'Application not found', success: false });
+		  }
+	  
+		  if (result.modifiedCount === 0) {
+			// No changes made
+			return res.status(200).send({ message: 'No changes were made', success: true });
+		  }
+	  
+		  // Successful update
+		  res.status(200).send({ message: 'Application updated successfully', success: true });
+		} catch (error) {
+		  console.error('Error updating application:', error);
+		  res.status(500).send({ message: 'Failed to update the application', success: false });
+		}
+	  });
 
 	  //my application page related api___________
 
@@ -250,9 +300,9 @@ async function run() {
 		  $set: {
 			phone: item.phone,
 			photo: item.photo,
-			village: item.studentAddress.village,
-			district: item.studentAddress.district,
-			country: item.studentAddress.country,
+			village: item.studentAddress?.village,
+			district: item.studentAddress?.district,
+			country: item.studentAddress?.country,
 			gender: item.gender,
 			degree: item.degree,
 			sscResult: item.sscResult,
