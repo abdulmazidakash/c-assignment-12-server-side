@@ -114,26 +114,6 @@ async function run() {
 		res.send(result);
 	  });
 
-	  //manage user status and role api
-	  app.patch('/users/:email', verifyToken, async(req, res) =>{
-		const email = req.params.email;
-		const query = { email};
-		const user = await usersCollection.findOne(query);  
-		
-		if(!user || user?.status === 'Requested')
-			return res
-					.status(409)
-					.send('You have already requested wait for some time.')
-		
-		const updatedDoc = {
-			$set: {
-				status: 'Requested',
-			},
-		}
-
-		const result = await usersCollection.updateOne(query, updatedDoc);
-		res.send(result);
-	  });
 
 
 	  //get user role
@@ -382,7 +362,7 @@ async function run() {
 			const { status } = req.body; // New status from the request body
 		
 			// Validate the status
-			const validStatuses = ["pending", "processing", "completed"];
+			const validStatuses = ["pending", "processing", "completed", "reject"];
 			if (!validStatuses.includes(status)) {
 			return res.status(400).send({ message: "Invalid status value" });
 			}
@@ -457,6 +437,21 @@ async function run() {
 			}
 		  });
 		  
+
+		  // GET route to fetch reviews for a specific scholarship
+		app.get('/reviews/:scholarshipId', async (req, res) => {
+			try {
+				const { scholarshipId } = req.params;
+				const reviews = await reviewCollection
+				.find({ scholarshipId: scholarshipId })
+				.toArray();
+
+				res.status(200).send(reviews);
+			} catch (error) {
+				console.error('Error fetching reviews:', error);
+				res.status(500).json({ message: 'Internal server error.' });
+			}
+		});
   
 
 
