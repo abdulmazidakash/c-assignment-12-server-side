@@ -628,81 +628,42 @@ async function run() {
 		//   });
 
 
-
-		app.get("/analytics", async (req, res) => {
+		//admin-stats api
+		  
+		  
+		app.get('/admin-stats', async (req, res) => {
 			try {
-			  // Mock data for testing
-			  const analyticsData = {
-				categories: {
-				  "Science": 50,
-				  "Engineering": 30,
-				  "Arts": 20
-				},
-				users: 500,
-				reviews: 300,
-				scholarships: 150
-			  };
-		  
-			  res.send(analyticsData); // Return the analytics data as JSON
+				// Count documents in different collections
+				const users = await usersCollection.estimatedDocumentCount();
+				const applications = await applyScholarshipCollection.estimatedDocumentCount();
+				const scholarships = await scholarshipCollection.estimatedDocumentCount();
+				const reviews = await reviewCollection.estimatedDocumentCount();
+		
+				// Aggregate subject categories (e.g., Agriculture, Engineering, etc.)
+				const subjectCategoriesAggregation = await scholarshipCollection.aggregate([
+					{ $match: { subjectCategory: { $exists: true, $ne: null } } }, // Only consider valid subject categories
+					{ $group: { _id: "$subjectCategory", count: { $sum: 1 } } },
+					{ $project: { _id: 0, subjectCategory: "$_id", count: 1 } }
+				]).toArray();
+		
+				const subjectCategories = subjectCategoriesAggregation.reduce((acc, curr) => {
+					acc[curr.subjectCategory] = curr.count;
+					return acc;
+				}, {});
+		
+				res.send({
+					users,
+					applications,
+					scholarships,
+					reviews,  
+					subjectCategories    // Subject categories object (Agriculture, Engineering, etc.)
+				});
 			} catch (error) {
-			  console.error("Error fetching analytics:", error);
-			  res.status(500).send({ message: "Failed to fetch analytics data" });
+				console.error('Error fetching admin stats:', error);
+				res.status(500).send({ error: 'Failed to fetch admin stats' });
 			}
-		  });
-
-		app.get("/real-analytics", async (req, res) => {
-			try {
-			  // Sample scholarship data from your provided JSON
-			//   const scholarships = [
-			// 	{
-			// 	  "_id": "6788cc5525d165f202f7ad8b",
-			// 	  "scholarshipName": "Global Agriculture Scholarship",
-			// 	  "universityName": "University of Cambridge",
-			// 	  "subjectCategory": "Agriculture",
-			// 	  "scholarshipCategory": "Full fund",
-			// 	  "degreeCategory": "Diploma",
-			// 	  "tuitionFees": 20000,
-			// 	  "applicationFees": 50,
-			// 	  "serviceCharge": 250,
-			// 	  "applicationDeadline": "2025-02-28",
-			// 	  "postDate": "2025-01-16",
-			// 	  "postedUserEmail": "akashabdulmazid01@gmail.com",
-			// 	},
-			// 	{
-			// 	  "_id": "6788cce125d165f202f7ad8c",
-			// 	  "scholarshipName": "Engineering Excellence Scholarship",
-			// 	  "universityName": "Stanford University",
-			// 	  "subjectCategory": "Engineering",
-			// 	  "scholarshipCategory": "Self-fund",
-			// 	  "degreeCategory": "Bachelor",
-			// 	  "tuitionFees": 0,
-			// 	  "applicationFees": 75,
-			// 	  "serviceCharge": 400,
-			// 	  "applicationDeadline": "2025-03-16",
-			// 	  "postDate": "2025-01-15",
-			// 	  "postedUserEmail": "ministertv16dec@gmail.com",
-			// 	},
-			// 	// Add all other scholarships here...
-			//   ];
-		  
-			  // Count scholarships per subject category
-			  const categoryCounts = scholarshipCollection.reduce((acc, scholarship) => {
-				const { subjectCategory } = scholarship;
-				acc[subjectCategory] = (acc[subjectCategory] || 0) + 1;
-				return acc;
-			  }, {});
-		  
-			  // Return the category counts as JSON
-			  res.send({ categories: categoryCounts });
-			} catch (error) {
-			  console.error("Error fetching analytics:", error);
-			  res.status(500).send({ message: "Failed to fetch analytics data" });
-			}
-		  });
-		  
-		  
-		  
-		  
+		});
+		
 		  
 
 
