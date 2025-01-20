@@ -617,7 +617,18 @@ async function run() {
 			const query =  {userEmail: email};
 			const result = await reviewCollection.find(query).toArray();
 			res.send(result);
-		})
+		});
+
+		// Delete a review by ID
+		app.delete("/review/:id", async (req, res) => {
+			try {
+			const { id } = req.params;
+			const result = await reviewCollection.deleteOne({ _id: new ObjectId(id) });
+			res.status(204).send(result);
+			} catch (error) {
+			res.status(500).send(error.message);
+			}
+		});
 
 
 		//admin-stats api_________________________________
