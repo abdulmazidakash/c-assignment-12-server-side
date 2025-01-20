@@ -629,8 +629,77 @@ async function run() {
 
 
 
+		app.get("/analytics", async (req, res) => {
+			try {
+			  // Mock data for testing
+			  const analyticsData = {
+				categories: {
+				  "Science": 50,
+				  "Engineering": 30,
+				  "Arts": 20
+				},
+				users: 500,
+				reviews: 300,
+				scholarships: 150
+			  };
+		  
+			  res.send(analyticsData); // Return the analytics data as JSON
+			} catch (error) {
+			  console.error("Error fetching analytics:", error);
+			  res.status(500).send({ message: "Failed to fetch analytics data" });
+			}
+		  });
 
-
+		app.get("/real-analytics", async (req, res) => {
+			try {
+			  // Sample scholarship data from your provided JSON
+			//   const scholarships = [
+			// 	{
+			// 	  "_id": "6788cc5525d165f202f7ad8b",
+			// 	  "scholarshipName": "Global Agriculture Scholarship",
+			// 	  "universityName": "University of Cambridge",
+			// 	  "subjectCategory": "Agriculture",
+			// 	  "scholarshipCategory": "Full fund",
+			// 	  "degreeCategory": "Diploma",
+			// 	  "tuitionFees": 20000,
+			// 	  "applicationFees": 50,
+			// 	  "serviceCharge": 250,
+			// 	  "applicationDeadline": "2025-02-28",
+			// 	  "postDate": "2025-01-16",
+			// 	  "postedUserEmail": "akashabdulmazid01@gmail.com",
+			// 	},
+			// 	{
+			// 	  "_id": "6788cce125d165f202f7ad8c",
+			// 	  "scholarshipName": "Engineering Excellence Scholarship",
+			// 	  "universityName": "Stanford University",
+			// 	  "subjectCategory": "Engineering",
+			// 	  "scholarshipCategory": "Self-fund",
+			// 	  "degreeCategory": "Bachelor",
+			// 	  "tuitionFees": 0,
+			// 	  "applicationFees": 75,
+			// 	  "serviceCharge": 400,
+			// 	  "applicationDeadline": "2025-03-16",
+			// 	  "postDate": "2025-01-15",
+			// 	  "postedUserEmail": "ministertv16dec@gmail.com",
+			// 	},
+			// 	// Add all other scholarships here...
+			//   ];
+		  
+			  // Count scholarships per subject category
+			  const categoryCounts = scholarshipCollection.reduce((acc, scholarship) => {
+				const { subjectCategory } = scholarship;
+				acc[subjectCategory] = (acc[subjectCategory] || 0) + 1;
+				return acc;
+			  }, {});
+		  
+			  // Return the category counts as JSON
+			  res.send({ categories: categoryCounts });
+			} catch (error) {
+			  console.error("Error fetching analytics:", error);
+			  res.status(500).send({ message: "Failed to fetch analytics data" });
+			}
+		  });
+		  
 		  
 		  
 		  
