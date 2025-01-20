@@ -579,7 +579,7 @@ async function run() {
 			}
 		});
 
-		//all review page review collection
+		//all review page review collection_____________
 		// Fetch all reviews
 		app.get("/all-reviews", verifyToken, async (req, res) => {
 			try {
@@ -589,6 +589,8 @@ async function run() {
 			res.status(500).json({ error: "Failed to fetch reviews" });
 			}
 		});
+
+
 
 		// Delete a review
 		app.delete("/all-reviews/:id", async (req, res) => {
@@ -606,32 +608,22 @@ async function run() {
 			}
 		});
 
+		//__________________________
+
 		//my review page api______________
-		//when use verifyToken then api not work
-		// app.get("/reviews",  async (req, res) => {
-		// 	try {
-		// 	  const email = req.query.email; // Extract email from query parameters
-		// 	  if (!email) {
-		// 		return res.status(400).send({ message: "Email is required" });
-		// 	  }
-		// 	  const query = { userEmail: email }; // Match userEmail with the query
-		// 	  console.log("Fetching reviews for email:", email);
-		  
-		// 	  const reviews = await reviewCollection.find(query).toArray(); // Fetch reviews
-		// 	  console.log("Reviews found:", reviews);
-		  
-		// 	  res.send(reviews); // Send the reviews back as response
-		// 	} catch (error) {
-		// 	  console.error("Error fetching reviews:", error);
-		// 	  res.status(500).send({ message: "Failed to fetch reviews" });
-		// 	}
-		//   });
+
+		app.get('/review', verifyToken, async(req, res) =>{
+			const email = req.query.email;
+			const query =  {userEmail: email};
+			const result = await reviewCollection.find(query).toArray();
+			res.send(result);
+		})
 
 
-		//admin-stats api
+		//admin-stats api_________________________________
 		  
 		  
-		app.get('/admin-stats', async (req, res) => {
+		app.get('/admin-stats', verifyToken, async (req, res) => {
 			try {
 				// Count documents in different collections
 				const users = await usersCollection.estimatedDocumentCount();
