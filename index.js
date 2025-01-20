@@ -619,6 +619,37 @@ async function run() {
 			res.send(result);
 		});
 
+		//my review page modal update api
+		app.patch("/review/:id", async (req, res) => {
+			try {
+			  const { id } = req.params;
+			  const { comment } = req.body;
+		  
+			  // Ensure feedback/comment is provided
+			  if (!comment) {
+				return res.status(400).send({ error: "comment fields are required" });
+			  }
+		  
+			  // Update the review in the database
+			  const result = await reviewCollection.updateOne(
+				{ _id: new ObjectId(id) },
+				{ $set: { comment } }
+			  );
+		  
+			  // Check if the update was successful
+			  if (result.modifiedCount === 0) {
+				return res.status(404).send({ error: "Review not found or no changes made" });
+			  }
+		  
+			  res.send({ message: "Review updated successfully" });
+			} catch (error) {
+			  console.error("Error updating review:", error);
+			  res.status(500).send({ error: "Failed to update review" });
+			}
+		  });
+		  
+		  
+
 		// Delete a review by ID
 		app.delete("/review/:id", async (req, res) => {
 			try {
