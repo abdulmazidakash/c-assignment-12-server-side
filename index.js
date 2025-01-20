@@ -155,19 +155,145 @@ async function run() {
 
 	  
 	  //add scholarship data____________________
+	 // top Scholarships endpoint
+
+		app.get('/top-scholarships', async (req, res) => {
+			try {
+			const topScholarships = await scholarshipCollection.aggregate([
+				// Step 1: Sort by application fees (ascending) and post date (descending)
+				{
+				$sort: {
+					applicationFees: 1, // Low application fees first
+					postDate: -1        // Recently posted first
+				}
+				},
+				// Step 2: Limit to 6 scholarships
+				{ $limit: 6 },
+				// Step 3: Lookup reviews to calculate average rating
+				{
+				$lookup: {
+					from: 'reviews', // Name of the review collection
+					let: { scholarshipId: "$_id" }, // Pass scholarship _id
+					pipeline: [
+					{
+						$match: {
+						$expr: {
+							$eq: ["$scholarshipId", { $toString: "$$scholarshipId" }] // Convert _id to string
+						}
+						}
+					}
+					],
+					as: 'reviews'
+				}
+				},
+				// Step 4: Add a field for the average rating
+				{
+				$addFields: {
+					averageRating: {
+					$avg: { $map: { input: "$reviews", as: "review", in: { $toDouble: "$$review.rating" } } }
+					}
+				}
+				},
+				// Step 5: Project necessary fields
+				{
+				$project: {
+					scholarshipName: 1,
+					universityName: 1,
+					image: 1,
+					universityCountry: 1,
+					universityCity: 1,
+					universityRank: 1,
+					subjectCategory: 1,
+					scholarshipCategory: 1,
+					degreeCategory: 1,
+					tuitionFees: 1,
+					applicationFees: 1,
+					applicationDeadline: 1,
+					postDate: 1,
+					averageRating: 1
+				}
+				}
+			]).toArray();
+		
+			res.status(200).send(topScholarships);
+			} catch (error) {
+			console.error("Error fetching top scholarships:", error);
+			res.status(500).send({ message: "Failed to fetch top scholarships" });
+			}
+		});
+
+		// all Scholarships endpoint
+
+		app.get('/all-scholarships', async (req, res) => {
+			try {
+			const topScholarships = await scholarshipCollection.aggregate([
+				
+				// Lookup reviews to calculate average rating
+				{
+				$lookup: {
+					from: 'reviews', // Name of the review collection
+					let: { scholarshipId: "$_id" }, // Pass scholarship _id
+					pipeline: [
+					{
+						$match: {
+						$expr: {
+							$eq: ["$scholarshipId", { $toString: "$$scholarshipId" }] // Convert _id to string
+						}
+						}
+					}
+					],
+					as: 'reviews'
+				}
+				},
+				// Add a field for the average rating
+				{
+				$addFields: {
+					averageRating: {
+					$avg: { $map: { input: "$reviews", as: "review", in: { $toDouble: "$$review.rating" } } }
+					}
+				}
+				},
+				//Project necessary fields
+				{
+				$project: {
+					scholarshipName: 1,
+					universityName: 1,
+					image: 1,
+					universityCountry: 1,
+					universityCity: 1,
+					universityRank: 1,
+					subjectCategory: 1,
+					scholarshipCategory: 1,
+					degreeCategory: 1,
+					tuitionFees: 1,
+					applicationFees: 1,
+					applicationDeadline: 1,
+					postDate: 1,
+					averageRating: 1
+				}
+				}
+			]).toArray();
+		
+			res.status(200).send(topScholarships);
+			} catch (error) {
+			console.error("Error fetching top scholarships:", error);
+			res.status(500).send({ message: "Failed to fetch top scholarships" });
+			}
+		});
 
 	  //save a scholarship data in db
 	  app.post('/scholarships', verifyToken, async(req, res) =>{
 		const scholarship = req.body;
 		const result = await scholarshipCollection.insertOne(scholarship);
 		res.send(result);
-	  })
+	  });
 
 	  //get all scholarships data from db
 	  app.get('/scholarships', async(req, res) =>{
 		const result = await scholarshipCollection.find().limit(20).toArray();
 		res.send(result);
 	  });
+
 
 	  // get a scholarships details by id
 	  app.get('/scholarships/:id', async(req, res) =>{
@@ -438,7 +564,7 @@ async function run() {
 		  });
 		  
 
-		  // GET route to fetch reviews for a specific scholarship
+		  // GET api to fetch reviews for a specific scholarship
 		app.get('/reviews/:scholarshipId', async (req, res) => {
 			try {
 				const { scholarshipId } = req.params;
@@ -452,7 +578,6 @@ async function run() {
 				res.status(500).json({ message: 'Internal server error.' });
 			}
 		});
-  
 
 
 
