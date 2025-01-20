@@ -36,6 +36,7 @@ async function run() {
 	const usersCollection = db.collection('users');
 	const scholarshipCollection = db.collection('scholarships');
 	const applyScholarshipCollection = db.collection('applyScholarships');
+	const reviewCollection = db.collection('reviews');
 
   // jwt related api
   app.post('/jwt', async (req, res) => {
@@ -429,6 +430,33 @@ async function run() {
 			res.status(500).send({ error: "Failed to add feedback" });
 			}
 		});
+
+
+		// review collection related api_________________
+		// Save review data in the database
+		app.post('/add-review', verifyToken, async (req, res) => {
+			const reviewData = req.body; // Contains review details like scholarshipId, userEmail, etc.
+			const { userEmail, scholarshipId } = reviewData;
+		  
+			try {
+			  // Check if a review from the same user for the same scholarshipId already exists
+			  const existingReview = await reviewCollection.findOne({ userEmail, scholarshipId });
+		  
+			  if (existingReview) {
+				return res.status(400).send({ 
+				  message: "You have already submitted a review for this scholarship." 
+				});
+			  }
+		  
+			  // Insert the new review if no existing review is found
+			  const result = await reviewCollection.insertOne(reviewData);
+			  res.status(201).send(result); // Successfully created
+			} catch (error) {
+			  console.error("Error saving review data:", error);
+			  res.status(500).send({ message: "Failed to save review data" });
+			}
+		  });
+		  
   
 
 
