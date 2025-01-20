@@ -579,6 +579,63 @@ async function run() {
 			}
 		});
 
+		//all review page review collection
+		// Fetch all reviews
+		app.get("/all-reviews", verifyToken, async (req, res) => {
+			try {
+			const reviews = await reviewCollection.find().toArray();
+			res.status(200).send(reviews);
+			} catch (error) {
+			res.status(500).json({ error: "Failed to fetch reviews" });
+			}
+		});
+
+		// Delete a review
+		app.delete("/all-reviews/:id", async (req, res) => {
+			try {
+			const { id } = req.params;
+			const result = await reviewCollection.deleteOne({ _id: new ObjectId(id) });
+		
+			if (result.deletedCount === 1) {
+				res.status(200).json({ message: "Review deleted successfully" });
+			} else {
+				res.status(404).json({ error: "Review not found" });
+			}
+			} catch (error) {
+			res.status(500).json({ error: "Failed to delete review" });
+			}
+		});
+
+		//my review page api______________
+		//when use verifyToken then api not work
+		// app.get("/reviews",  async (req, res) => {
+		// 	try {
+		// 	  const email = req.query.email; // Extract email from query parameters
+		// 	  if (!email) {
+		// 		return res.status(400).send({ message: "Email is required" });
+		// 	  }
+		// 	  const query = { userEmail: email }; // Match userEmail with the query
+		// 	  console.log("Fetching reviews for email:", email);
+		  
+		// 	  const reviews = await reviewCollection.find(query).toArray(); // Fetch reviews
+		// 	  console.log("Reviews found:", reviews);
+		  
+		// 	  res.send(reviews); // Send the reviews back as response
+		// 	} catch (error) {
+		// 	  console.error("Error fetching reviews:", error);
+		// 	  res.status(500).send({ message: "Failed to fetch reviews" });
+		// 	}
+		//   });
+
+
+
+
+
+		  
+		  
+		  
+		  
+
 
 
 	  //payment related_______________
