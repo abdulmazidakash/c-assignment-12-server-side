@@ -428,7 +428,7 @@ async function run() {
 	  
 	  //edit my application page patch request api
 
-	  app.patch('/edit-my-application/:id', async (req, res) => {
+	  app.patch('/edit-my-application/:id', verifyToken, async (req, res) => {
 		const item = req.body;
 		const id = req.params.id;
 		const filter = { _id: new ObjectId(id) };
@@ -475,7 +475,7 @@ async function run() {
 
 	   //all applied scholarship page___________
 	   //get all applied scholarship data from applyScholarships collection
-		app.get("/apply-scholarships", async (req, res) => {
+		app.get("/apply-scholarships", verifyToken, async (req, res) => {
 			try {
 			const { status } = req.query; // Optional filter for status
 			const filter = {};
@@ -490,7 +490,7 @@ async function run() {
 		});
 
 		// Cancel a scholarship application
-		app.patch("/apply-scholarship/cancel/:id", async (req, res) => {
+		app.patch("/apply-scholarship/cancel/:id", verifyToken, verifyAdminOrModerator, async (req, res) => {
 			try {
 			const { id } = req.params;
 			const filter = { _id: new ObjectId(id) };
@@ -512,12 +512,12 @@ async function run() {
 		});
 
 		// Update Application Status
-		app.patch('/update-status/:id', async (req, res) => {
+		app.patch('/update-status/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
 			const { id } = req.params; // Application ID
 			const { status } = req.body; // New status from the request body
 		
 			// Validate the status
-			const validStatuses = ["pending", "processing", "completed", "reject"];
+			const validStatuses = ["pending", "processing", "completed"];
 			if (!validStatuses.includes(status)) {
 			return res.status(400).send({ message: "Invalid status value" });
 			}
@@ -541,7 +541,7 @@ async function run() {
 		});
 	  
 		// Add feedback to a scholarship
-		app.patch("/apply-scholarship/:id/feedback", async (req, res) => {
+		app.patch("/apply-scholarship/:id/feedback", verifyToken, verifyAdminOrModerator, async (req, res) => {
 			try {
 			const { id } = req.params;
 			const { feedback } = req.body;
@@ -594,7 +594,7 @@ async function run() {
 		  
 
 		  // GET api to fetch reviews for a specific scholarship
-		app.get('/reviews/:scholarshipId', async (req, res) => {
+		app.get('/reviews/:scholarshipId', verifyToken, async (req, res) => {
 			try {
 				const { scholarshipId } = req.params;
 				const reviews = await reviewCollection
@@ -604,25 +604,25 @@ async function run() {
 				res.status(200).send(reviews);
 			} catch (error) {
 				console.error('Error fetching reviews:', error);
-				res.status(500).json({ message: 'Internal server error.' });
+				res.status(500).send({ message: 'Internal server error.' });
 			}
 		});
 
 		//all review page review collection_____________
 		// Fetch all reviews
-		app.get("/all-reviews", verifyToken, async (req, res) => {
+		app.get("/all-reviews", verifyToken, verifyAdminOrModerator, async (req, res) => {
 			try {
 			const reviews = await reviewCollection.find().toArray();
 			res.status(200).send(reviews);
 			} catch (error) {
-			res.status(500).json({ error: "Failed to fetch reviews" });
+			res.status(500).send({ error: "Failed to fetch reviews" });
 			}
 		});
 
 
 
 		// Delete a review
-		app.delete("/all-reviews/:id", async (req, res) => {
+		app.delete("/all-reviews/:id", verifyToken, verifyAdminOrModerator, async (req, res) => {
 			try {
 			const { id } = req.params;
 			const result = await reviewCollection.deleteOne({ _id: new ObjectId(id) });
@@ -649,7 +649,7 @@ async function run() {
 		});
 
 		//my review page modal update api
-		app.patch("/review/:id", async (req, res) => {
+		app.patch("/review/:id", verifyToken, async (req, res) => {
 			try {
 			  const { id } = req.params;
 			  const { comment } = req.body;
@@ -680,7 +680,7 @@ async function run() {
 		  
 
 		// Delete a review by ID
-		app.delete("/review/:id", async (req, res) => {
+		app.delete("/review/:id", verifyToken, async (req, res) => {
 			try {
 			const { id } = req.params;
 			const result = await reviewCollection.deleteOne({ _id: new ObjectId(id) });
