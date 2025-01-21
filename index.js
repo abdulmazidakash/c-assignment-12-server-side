@@ -61,18 +61,6 @@ async function run() {
 	})
   };
 
-    // use verify admin after verifyToken
-    // const verifyAdmin = async (req, res, next) => {
-	// 	const email = req.user?.email;
-	// 	const query = { email };
-	// 	const result = await usersCollection.findOne(query);
-	// 	console.log(result);
-
-	// 	if (!result || result?.role !== 'admin') {
-	// 	  return res.status(403).send({ message: 'forbidden access! Admin Only Actions' });
-	// 	}
-	// 	next();
-	//   };
 
 	    // use verify admin after verifyToken
 		const verifyAdmin = async (req, res, next) => {
@@ -104,21 +92,6 @@ async function run() {
 				next();
 			};
   
-
-    // // use verify admin after verifyToken
-    // const verifyModerator = async (req, res, next) => {
-	// 	const email = req.user?.email;
-	// 	const query = { email };
-	// 	const result = await usersCollection.findOne(query);
-
-	// 	if (!result || result?.role !== 'moderator') {
-	// 	  return res.status(403).send({ message: 'forbidden access! Moderator Only Actions' });
-	// 	}
-	// 	next();
-	//   };
-
-
-
 	  //users related api____________________
 
 	  //save or update user in db
