@@ -62,28 +62,60 @@ async function run() {
   };
 
     // use verify admin after verifyToken
-    const verifyAdmin = async (req, res, next) => {
-		const email = req.user?.email;
-		const query = { email };
-		const result = await usersCollection.findOne(query);
+    // const verifyAdmin = async (req, res, next) => {
+	// 	const email = req.user?.email;
+	// 	const query = { email };
+	// 	const result = await usersCollection.findOne(query);
+	// 	console.log(result);
 
-		if (!result || result?.role !== 'admin') {
-		  return res.status(403).send({ message: 'forbidden access! Admin Only Actions' });
-		}
-		next();
-	  };
+	// 	if (!result || result?.role !== 'admin') {
+	// 	  return res.status(403).send({ message: 'forbidden access! Admin Only Actions' });
+	// 	}
+	// 	next();
+	//   };
 
-    // use verify admin after verifyToken
-    const verifyModerator = async (req, res, next) => {
-		const email = req.user?.email;
-		const query = { email };
-		const result = await usersCollection.findOne(query);
+	    // use verify admin after verifyToken
+		const verifyAdmin = async (req, res, next) => {
+			const email = req.decoded.email;
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			const isAdmin = user?.role === 'admin';
+			if (!isAdmin) {
+			  return res.status(403).send({ message: 'forbidden access' });
+			}
+			next();
+		  }
 
-		if (!result || result?.role !== 'moderator') {
-		  return res.status(403).send({ message: 'forbidden access! Moderator Only Actions' });
-		}
-		next();
-	  };
+		  // Middleware to verify admin or moderator after verifyToken
+			const verifyAdminOrModerator = async (req, res, next) => {
+				const email = req.decoded.email;
+				const query = { email: email };
+				const user = await usersCollection.findOne(query);
+			
+				if (!user) {
+				return res.status(404).send({ message: 'User not found' });
+				}
+			
+				const allowedRoles = ['admin', 'moderator'];
+				if (!allowedRoles.includes(user.role)) {
+				return res.status(403).send({ message: 'Forbidden access' });
+				}
+			
+				next();
+			};
+  
+
+    // // use verify admin after verifyToken
+    // const verifyModerator = async (req, res, next) => {
+	// 	const email = req.user?.email;
+	// 	const query = { email };
+	// 	const result = await usersCollection.findOne(query);
+
+	// 	if (!result || result?.role !== 'moderator') {
+	// 	  return res.status(403).send({ message: 'forbidden access! Moderator Only Actions' });
+	// 	}
+	// 	next();
+	//   };
 
 
 
@@ -105,9 +137,6 @@ async function run() {
 		  }
   
 		const result = await usersCollection.insertOne({
-		//   name: user?.image,
-		//   email: user?.email,
-		//   image: user?.image,
 		...user,
 		  role: 'student',
 		  timestamp: Date.now()});
@@ -125,7 +154,7 @@ async function run() {
 	  });
 
 	  //get all user data
-	  app.get('/all-users/:email', verifyToken, async(req, res) =>{
+	  app.get('/all-users/:email', verifyToken, verifyAdmin,  async(req, res) =>{
 		const email = req.params.email;
 		const query = { email: { $ne: email}};
 		const result = await usersCollection.find(query).toArray();
@@ -134,7 +163,7 @@ async function run() {
 
 
 	  //update a user role
-	  app.patch('/user/role/:email', verifyToken, async(req, res) =>{
+	  app.patch('/user/role/:email', verifyToken, verifyAdmin, async(req, res) =>{
 		const email = req.params.email;
 		const { role } = req.body;
 		const filter = { email };
@@ -146,7 +175,7 @@ async function run() {
 	  });
 
 	  //delete user related api
-		app.delete('/user/:id', verifyToken, async(req, res) =>{
+		app.delete('/user/:id', verifyToken, verifyAdmin, async(req, res) =>{
 			const id = req.params.id;
 			const query = { _id: new ObjectId(id)};
 			const result = await usersCollection.deleteOne(query);
@@ -282,7 +311,7 @@ async function run() {
 		});
 
 	  //save a scholarship data in db
-	  app.post('/scholarships', verifyToken, async(req, res) =>{
+	  app.post('/scholarships', verifyToken, verifyAdminOrModerator, async(req, res) =>{
 		const scholarship = req.body;
 		const result = await scholarshipCollection.insertOne(scholarship);
 		res.send(result);
@@ -296,7 +325,7 @@ async function run() {
 
 
 	  // get a scholarships details by id
-	  app.get('/scholarships/:id', async(req, res) =>{
+	  app.get('/scholarships/:id', verifyToken, async(req, res) =>{
 		const id = req.params.id;
 		const query = { _id: new ObjectId(id)};
 		const result = await scholarshipCollection.findOne(query);
@@ -307,7 +336,7 @@ async function run() {
 	  //moderator and admin manage scholarship page api_________
 	  //delete manage scholarship related api
 
-		app.delete('/scholarship/:id', verifyToken, async(req, res) =>{
+		app.delete('/scholarship/:id', verifyToken, verifyAdminOrModerator, async(req, res) =>{
 			const id = req.params.id;
 			const query = { _id: new ObjectId(id)};
 			const result = await scholarshipCollection.deleteOne(query);
@@ -316,7 +345,7 @@ async function run() {
 		
 	//update scholarship modal api - manage scholarship page
 
-	app.put('/edit-manage-scholarship/:id', verifyToken, async (req, res) => {
+	app.put('/edit-manage-scholarship/:id', verifyToken, verifyAdminOrModerator, async (req, res) => {
 		const item = req.body;
 		console.log(item);
 		const id = req.params.id;
@@ -665,7 +694,7 @@ async function run() {
 		//admin-stats api_________________________________
 		  
 		  
-		app.get('/admin-stats', verifyToken, async (req, res) => {
+		app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
 			try {
 				// Count documents in different collections
 				const users = await usersCollection.estimatedDocumentCount();
